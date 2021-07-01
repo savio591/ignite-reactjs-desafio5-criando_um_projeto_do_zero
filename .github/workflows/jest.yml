@@ -27,4 +27,4 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: yarn --frozen-lockfile --prefer-offline
       - name: Run unitary tests
-        run: yarn test
+        run: yarn jest
