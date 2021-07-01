@@ -142,13 +142,6 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      // first_publication_date: new Date(
-      //   post.first_publication_date
-      // ).toLocaleDateString('pt-BR', {
-      //   day: '2-digit',
-      //   month: 'narrow',
-      //   year: 'numeric',
-      // }),
       first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
