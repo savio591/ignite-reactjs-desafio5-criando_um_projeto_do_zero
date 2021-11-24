@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 import Head from 'next/head';
 
@@ -60,34 +60,49 @@ export default function Post({ post: rawPost }: PostProps): JSX.Element {
   const router = useRouter();
   const [post, setPost] = useState<PostFormatted>({} as PostFormatted);
 
+  useLayoutEffect(() => {
+    const script = document.createElement('script');
+    const anchor = document.getElementById('inject-comments-for-uterances');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.setAttribute('async', 'true');
+    script.setAttribute(
+      'repo',
+      'https://github.com/savio591/ignite-reactjs-desafio5-criando_um_projeto_do_zero'
+    );
+    script.setAttribute('issue-term', 'url');
+    script.setAttribute('theme', 'preferred-color-scheme');
+    anchor.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (!router.isFallback) {
+      setPost({
+        ...rawPost,
+        first_publication_date: format(
+          new Date(rawPost.first_publication_date),
+          'dd MMM yyyy',
+          {
+            locale: ptBR,
+          }
+        ),
+        read_time: '4 min',
+        data: {
+          ...rawPost.data,
+          content: rawPost.data.content.map(section => {
+            return {
+              ...section,
+              body: RichText.asHtml(section.body),
+            };
+          }),
+        },
+      });
+    }
+  }, [rawPost, router.isFallback]);
+
   if (router.isFallback) {
     return <h1>Carregando...</h1>;
   }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    setPost({
-      ...rawPost,
-      first_publication_date: format(
-        new Date(rawPost.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
-      read_time: '4 min',
-      data: {
-        ...rawPost.data,
-        content: rawPost.data.content.map(section => {
-          return {
-            ...section,
-            body: RichText.asHtml(section.body),
-          };
-        }),
-      },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return post?.data ? (
     <>
@@ -126,6 +141,7 @@ export default function Post({ post: rawPost }: PostProps): JSX.Element {
               </section>
             );
           })}
+          <div id="inject-comments-for-uterances" />
         </>
       </main>
     </>
